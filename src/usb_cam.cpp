@@ -56,6 +56,7 @@
 
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
+
 namespace usb_cam {
 
 static void errno_exit(const char * s)
@@ -394,7 +395,7 @@ int UsbCam::init_mjpeg_decoder(int image_width, int image_height)
   avcodec_context_->codec_type = AVMEDIA_TYPE_VIDEO;
 #endif
 
-  avframe_camera_size_ = avpicture_get_size(AV_PIX_FMT_YUV422P, image_width, image_height);
+  avframe_camera_size_ = avpicture_get_size(AV_PIX_FMT_YUV420P, image_width, image_height);
   avframe_rgb_size_ = avpicture_get_size(AV_PIX_FMT_RGB24, image_width, image_height);
 
   /* open it */
@@ -429,6 +430,11 @@ void UsbCam::mjpeg2rgb(char *MJPEG, int len, char *RGB, int NumPixels)
 #else
   avcodec_decode_video(avcodec_context_, avframe_camera_, &got_picture, (uint8_t *) MJPEG, len);
 #endif
+
+  if(avcodec_context_->pix_fmt == AV_PIX_FMT_YUVJ420P)
+  {
+  avcodec_context_->pix_fmt = AV_PIX_FMT_YUV420P;
+  }
 
   if (!got_picture)
   {
